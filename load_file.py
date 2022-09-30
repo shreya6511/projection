@@ -6,43 +6,37 @@ import cv2
 
 # loading data of pushing points from text file into 2D array
 pushing_points = [[0 for i in range(4)] for j in range(9)]
-with open("trial_37/pushing_history.txt") as f:
+with open("trial_35/pushing_history.txt") as f:
     i = 0
-    for line in f:
-        
-        direction = line[line.find(':') + 1: line.find(',')]
-        if(direction == 'right'):
-            pushing_points[i][0] = 1
-        else:
-            pushing_points[i][0] = -1
-        
+    for line in f:        
         points = line[line.find('[') + 1: line.find(']')]
         point = points.split()
         
-        pushing_points[i][1] = point[0]
-        pushing_points[i][2] = point[1]
-        pushing_points[i][3] = point[2]
+        pushing_points[i][0] = point[0]
+        pushing_points[i][1] = point[1]
+        pushing_points[i][2] = point[2]
+        pushing_points[i][3] = 1
         i += 1
 f.close()
 
 # loading projection matrix from data for camera to base 
 annots = loadmat('trans_data_35.mat')
-proj_matrix_cTb = [[element for element in upperElement] for upperElement in annots['trans']]
+matrix_cTb = [[element for element in upperElement] for upperElement in annots['trans']]
 
-# inverting matrix to be the projection matrix from base to camera
-proj_matrix_bTc= np.linalg.inv(proj_matrix_cTb)
-print(proj_matrix_bTc)
+# inverting matrix from base to camera
+matrix_bTc= np.linalg.inv(matrix_cTb)
+
 pushing_points = np.array(pushing_points, dtype=float)
-camera_coords = np.dot(pushing_points, proj_matrix_bTc)
+camera_coords = np.dot(matrix_bTc, pushing_points[0])
 
 # printing result matrix (of points in )
-columns = ['dir', 'x', 'y', 'z']
+""" columns = ['x', 'y', 'z' '1']
 df = pd.DataFrame (camera_coords, columns=columns)
-print(df)
+print(df) """
 
 # camera coordinates to pixel coordinates
-img_width = 480
-img_height = 640
+img_width = 640
+img_height = 480
 fov = 45
 near = 0.01
 aspect_ratio = img_width / img_height
@@ -54,12 +48,13 @@ focal_length = near * alpha
 fx = focal_length; fy = focal_length
 
 # x, y, z in camera coordinates
-Xc = camera_coords[1][1]
-Yc = camera_coords[1][2]
-Zc = camera_coords[1][3]
+print(camera_coords)
+Xc = camera_coords[0]
+Yc = camera_coords[0]
+Zc = camera_coords[0]
 
-Px = img_height / 2 # principal off set  
-Py = img_width / 2
+Px = img_width / 2 # principal off set  
+Py = img_height / 2
 
 # calculating x , y in pixel coordinates
 Xp = fx * (Xc / Zc) + Px
