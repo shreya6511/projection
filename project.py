@@ -1,3 +1,4 @@
+from turtle import pu
 from scipy.io import loadmat
 import numpy as np
 
@@ -44,9 +45,26 @@ annots = loadmat('trial_1/trans_data.mat')
 trans_mat = [[element for element in upperElement] for upperElement in annots['trans']] # maybe just the 3D Rotation
 extrinsic = np.asarray(trans_mat)
 print(extrinsic.shape)
-projection = np.dot(intrinsic, extrinsic)
+p = pushing_points[0]
+p = np.array(p, dtype=float)
+print(p.shape)
+temp = np.dot(extrinsic, p)
+temp = temp[0:3]
 
-camera_coords = np.dot(projection, pushing_points[0])
+camera_coords = np.dot(intrinsic, temp)
 
 print(camera_coords)
+
+Xc = camera_coords[0]
+Yc = camera_coords[1]
+Zc = camera_coords[2]
+
+Px = img_height / 2 # principal off set  
+Py = img_width / 2
+
+# calculating x , y in pixel coordinates
+Xp = (Xc / Zc)
+Yp = (Yc / Zc)
+print(Xp)
+print(Yp)
 
